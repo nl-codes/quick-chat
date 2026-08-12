@@ -247,14 +247,14 @@ JWT_SECRET=your_jwt_secret_key
 CLOUDINARY_CLOUD_NAME=your_cloudinary_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
-PORT=5000
+PORT=5050
 ```
 
 **Client (`.env`)**
 
 ```env
-VITE_API_BASE_URL=http://localhost:5000
-VITE_SOCKET_URL=http://localhost:5000
+VITE_API_BASE_URL=http://localhost:5050
+VITE_SOCKET_URL=http://localhost:5050
 ```
 
 4. Start the development servers:
