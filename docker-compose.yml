@@ -1,0 +1,23 @@
+services:
+    qc-client:
+        image: lohani01/quick-chat:client-v1.0
+        container_name: qc-client
+        ports:
+            - "8080:80"
+        env_file:
+            - env/client/.env
+        networks:
+            - qc-public-net
+        depends_on:
+            - qc-server
+    qc-server:
+        image: lohani01/quick-chat:server-v1.0
+        container_name: qc-server
+        ports:
+            - "5050:5050"
+        env_file:
+            - env/server/.env
+        networks:
+            - qc-public-net
+networks:
+    qc-public-net:
