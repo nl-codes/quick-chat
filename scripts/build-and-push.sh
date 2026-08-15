@@ -23,6 +23,6 @@ IMAGE_NAME="$DOCKERHUB_USERNAME/$REPOSITORY:$TAG"
 docker buildx create --use 2>/dev/null || true
 
 echo "Building and pushing $IMAGE_NAME for AMD64/ARM64..."
-docker buildx build --platform linux/amd64,linux/arm64 -t "$IMAGE_NAME" ../$SUB_REPOSITORY --push
+docker buildx build --platform linux/amd64,linux/arm64 -t "$IMAGE_NAME" ./"$SUB_REPOSITORY" --push
 
 echo "Done. $SUB_REPOSITORY multi-arch image is live on Docker Hub."
