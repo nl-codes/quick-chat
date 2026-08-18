@@ -3,7 +3,7 @@ name: Backend CI/CD
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [aws]
     paths: ['server/**'] # only when backend code changes
 
 jobs:
