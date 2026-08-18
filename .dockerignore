@@ -5,3 +5,4 @@ node_modules
 secret/
 scripts/
 *.pem
+.aws
