@@ -1,23 +1,38 @@
 services:
-    qc-client:
-        image: lohani01/quick-chat:client-v1.0
-        container_name: qc-client
+    nginx:
+        image: nginx:alpine
+        container_name: qc-nginx
         ports:
-            - "8080:80"
-        env_file:
-            - env/client/.env
+            - "80:80"
+        volumes:
+            - ./server/nginx-ec2.conf:/etc/nginx/nginx.conf:ro
+        depends_on:
+            - qc-api1
+            - qc-api2
+            - qc-api3
+        restart: unless-stopped
         networks:
             - qc-public-net
-        depends_on:
-            - qc-server
-    qc-server:
-        image: lohani01/quick-chat:server-v1.0
-        container_name: qc-server
-        ports:
-            - "5050:5050"
+
+    qc-api1: &qc-api
+        image: ${DOCKERHUB_USERNAME:-lohani01}/quick-chat:server-${VERSION:-v1.0}
         env_file:
             - env/server/.env
+        environment:
+            - INSTANCE_ID=qc-api1
+        restart: unless-stopped
         networks:
             - qc-public-net
+
+    qc-api2:
+        <<: *qc-api
+        environment:
+            - INSTANCE_ID=qc-api2
+
+    qc-api3:
+        <<: *qc-api
+        environment:
+            - INSTANCE_ID=qc-api3
+
 networks:
     qc-public-net:
