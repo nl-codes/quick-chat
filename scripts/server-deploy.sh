@@ -2,24 +2,33 @@
 set -euo pipefail
 
 # --- Settings ---
-USERNAME="lohani01"
-REPOSITORY="quick-chat"
-VERSION="v1.0"
-FULL_IMAGE="$USERNAME/$REPOSITORY:server-$VERSION"
-SERVICE_NAME="qc-server"
+TAG="$SUB_REPOSITORY-$VERSION"
+IMAGE_NAME="$DOCKERHUB_USERNAME/$REPOSITORY:$TAG"
 
-# --- Connection Details ---
-KEY="../secret/docker-mern-key.pem"
-EC2_HOST="ec2-user@44.219.0.6"
 REMOTE_APP_DIR="~/quick-chat"
 
-# --- Deploy to EC2 ---
-echo "Deploying $FULL_IMAGE to $EC2_HOST ..."
+# write the key from the environment to a temp file, lock it down
+echo "$EC2_SSH_KEY" > key.pem
+chmod 400 key.pem
 
-ssh -o StrictHostKeyChecking=accept-new -i "$KEY" "$EC2_HOST" "
+# --- Deploy to EC2 ---
+echo "Deploying load-balanced backend stack with $IMAGE_NAME to $EC2_USER@$EC2_HOST ..."
+
+# Ensure destination structure exists
+ssh -o StrictHostKeyChecking=accept-new -i key.pem "$EC2_USER@$EC2_HOST" "mkdir -p $REMOTE_APP_DIR/server"
+
+# Sync runtime compose and nginx config used by EC2
+scp -o StrictHostKeyChecking=accept-new -i key.pem docker-compose.yml "$EC2_USER@$EC2_HOST:$REMOTE_APP_DIR/docker-compose.yml"
+scp -o StrictHostKeyChecking=accept-new -i key.pem server/nginx-ec2.conf "$EC2_USER@$EC2_HOST:$REMOTE_APP_DIR/server/nginx-ec2.conf"
+
+ssh -o StrictHostKeyChecking=accept-new -i key.pem "$EC2_USER@$EC2_HOST" "
   cd $REMOTE_APP_DIR
-  docker compose pull $SERVICE_NAME
-  docker compose up -d --no-deps $SERVICE_NAME
+  export DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME
+  export VERSION=$VERSION
+  docker compose pull nginx qc-api1 qc-api2 qc-api3
+  docker compose up -d --remove-orphans
 "
 
-echo "Server deployment complete. API listening internally on port 5050."
+rm -f key.pem
+
+echo "Server deployment complete. Nginx is live on port 80 with qc-api replicas behind it."

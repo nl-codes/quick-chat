@@ -10,7 +10,7 @@ SERVICE_NAME="qc-client"
 
 # --- Connection Details ---
 KEY="../secret/docker-mern-key.pem"
-EC2_HOST="ec2-user@44.219.0.6"
+EC2_HOST="ec2-user@34.207.49.215"
 REMOTE_APP_DIR="~/quick-chat"
 
 # --- Deploy to EC2 ---

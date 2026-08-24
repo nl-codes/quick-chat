@@ -3,38 +3,39 @@ name: Frontend CI/CD
 on:
   workflow_dispatch:
   push:
-    branches: [master]
-    paths: ['client/**'] # only when frontend code changes
+    branches: [aws]
+    paths: ['client/**']
 
 jobs:
-    build-and-push:
-        runs-on: ubuntu-latest
-        environment: qc-aws-environment
-        steps:
-          - uses: actions/checkout@v4
-          - name: Build and push
-            run: bash scripts/build-and-push.sh
-            env:
-                DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-                DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-                REPOSITORY: ${{ vars.REPOSITORY}}
-                SUB_REPOSITORY: client
-                VERSION: v1.0
+  deploy-s3:
+    runs-on: ubuntu-latest
+    environment: qc-aws-environment
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    deploy:
-        needs: build-and-push # only after the image is pushed
-        environment: qc-aws-environment
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - name: Deploy to EC2
-              run: bash scripts/deploy.sh
-              env:
-                DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-                REPOSITORY: ${{ vars.REPOSITORY}}
-                VERSION: v1.0
-                SUB_REPOSITORY: client
-                SERVICE_NAME: qc-client
-                EC2_HOST: ${{ secrets.EC2_HOST }}
-                EC2_USER: ${{ secrets.EC2_USER }}
-                EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd client
+          npm ci
+
+      - name: Configure AWS Credentials (AWS Academy)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Run S3 Deploy Script
+        run: bash scripts/s3-deploy.sh
+        env:
+          VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
+          S3_BUCKET: "s3://${{ vars.S3_BUCKET_NAME }}"

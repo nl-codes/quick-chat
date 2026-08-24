@@ -6,6 +6,7 @@ import { connectDB } from "./lib/db.js";
 import userRouter from "./routes/userRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
 import { Server } from "socket.io";
+import os from "os";
 
 // Create Express app and HTTP server
 const app = express();
@@ -45,6 +46,14 @@ app.get("/", (req, res) => {
     res.send("Welcome to Quick Chat API");
 });
 app.use("/api/status", (req, res) => res.send("Server is live"));
+
+app.get("/api/whoami", (req, res) => {
+    res.json({
+        instance: process.env.INSTANCE_ID,
+        hostname: os.hostname(),
+        pid: process.pid,
+    });
+});
 
 app.use("/api/auth", userRouter);
 app.use("/api/messages", messageRouter);
