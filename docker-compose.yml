@@ -6,6 +6,7 @@ services:
             - "80:80"
         volumes:
             - ./server/nginx-ec2.conf:/etc/nginx/nginx.conf:ro
+            - /etc/letsencrypt:/etc/letsencrypt:ro
         depends_on:
             - qc-api1
             - qc-api2
