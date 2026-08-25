@@ -1,41 +1,44 @@
 name: Frontend CI/CD
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [aws]
-    paths: ['client/**']
+    workflow_dispatch:
+    push:
+        branches: [aws]
+        paths:
+            - "client/**"
+            - "scripts/deploy-s3.sh"
+            - ".github/workflows/frontend.yml"
 
 jobs:
-  deploy-s3:
-    runs-on: ubuntu-latest
-    environment: qc-aws-environment
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+    deploy-s3:
+        runs-on: ubuntu-latest
+        environment: qc-aws-environment
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
-          cache-dependency-path: client/package-lock.json
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: "npm"
+                  cache-dependency-path: client/package-lock.json
 
-      - name: Install Frontend Dependencies
-        run: |
-          cd client
-          npm ci
+            - name: Install Frontend Dependencies
+              run: |
+                  cd client
+                  npm ci
 
-      - name: Configure AWS Credentials (AWS Academy)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: us-east-1
+            - name: Configure AWS Credentials (AWS Academy)
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+                  aws-region: us-east-1
 
-      - name: Run S3 Deploy Script
-        run: bash scripts/s3-deploy.sh
-        env:
-          VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
-          S3_BUCKET: "s3://${{ vars.S3_BUCKET_NAME }}"
+            - name: Run S3 Deploy Script
+              run: bash scripts/s3-deploy.sh
+              env:
+                  VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
+                  S3_BUCKET: "s3://${{ vars.S3_BUCKET_NAME }}"
