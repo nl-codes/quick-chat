@@ -3,8 +3,8 @@ set -euo pipefail
 
 # --- Settings ---
 FRONTEND_DIR="client"
-# S3_BUCKET="s3://quick-chat-s3-bucket" # passed from env
-S3_BUCKET="${S3_BUCKET:-s3://quick-chat-s3-bucket}"
+# S3_BUCKET="s3://quick-chat.narayanlohani.com.np" # passed from env
+S3_BUCKET="${S3_BUCKET:-s3://quick-chat.narayanlohani.com.np}"
 
 echo "0. Change directory to frontend"
 cd "$FRONTEND_DIR"
