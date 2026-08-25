@@ -4,6 +4,7 @@ services:
         container_name: qc-nginx
         ports:
             - "80:80"
+            - "443:443"
         volumes:
             - ./server/nginx-ec2.conf:/etc/nginx/nginx.conf:ro
             - /etc/letsencrypt:/etc/letsencrypt:ro
